@@ -19,7 +19,7 @@ rust-mcp-gateway
 
 ## Child definitions
 
-Each `servers.d/*.yaml` file defines one child:
+Runtime child definitions are host-local generated files. In the deployed layout they live under `mcp-server/bin/gateway/servers.d`; source control keeps only templates/candidates, not active host-specific YAML. Each active `*.yaml` file defines one child:
 
 ```yaml
 name: git
@@ -98,7 +98,7 @@ The prepared `servers.d/git.yaml.candidate` contains this default profile. Do no
 The repository includes an idempotent one-shot patcher:
 
 ```bash
-cd /Users/xiivth/workspaces/signs/mcp-server/gateway
+cd /path/to/workspace/mcp-server/src/gateway
 python3 scripts/apply_tool_allowlist.py
 ```
 
@@ -115,10 +115,11 @@ cargo build --all-targets --all-features
 cargo build --release --locked
 ```
 
-Then activate the candidate configuration and reload the gateway:
+Then render/activate host-local runtime configuration through the fleet tool rather than committing an active YAML file:
 
 ```bash
-cp servers.d/git.yaml.candidate servers.d/git.yaml
+cd /path/to/workspace/mcp-server/src/fleet
+python3 scripts/fleetctl.py render-gateway --host aira
 ```
 
 The gateway watcher can reload automatically, or `gateway_reload` can be invoked explicitly. The expected Git child `tool_count` is 21 while the Git child binary itself still implements 28 tools.
@@ -134,7 +135,7 @@ The config directory is watched by default. A changed YAML file triggers reload.
 ## Build
 
 ```bash
-cd /Users/xiivth/workspaces/signs/mcp-server/gateway
+cd /path/to/workspace/mcp-server/src/gateway
 cargo fmt --all
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-targets --all-features
@@ -152,8 +153,8 @@ Then commit `Cargo.lock` and use `--locked` for subsequent builds.
 ## Run standalone
 
 ```bash
-./target/release/rust-mcp-gateway \
-  --config-dir /Users/xiivth/workspaces/signs/mcp-server/gateway/servers.d
+/path/to/workspace/mcp-server/bin/gateway/rust-mcp-gateway \
+  --config-dir /path/to/workspace/mcp-server/bin/gateway/servers.d
 ```
 
 Use `--no-watch` to disable automatic reload/health polling.

@@ -1,9 +1,0 @@
-name: filesystem
-enabled: true
-command: "/Users/xiivth/workspaces/signs/mcp-server/bin/filesystem/rust-mcp-filesystem"
-args:
-  - "--root"
-  - "/Users/xiivth/workspaces/signs"
-timeout_ms: 30000
-restart:
-  policy: on-failure

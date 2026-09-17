@@ -7,3 +7,6 @@
 *.swp
 *.swo
 *~
+# Host-local generated runtime config lives under mcp-server/bin/gateway/servers.d
+servers.d/*.yaml
+servers.d/*.yml
