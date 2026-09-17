@@ -1,6 +1,6 @@
 name: git
 enabled: true
-command: "/Users/xiivth/workspaces/signs/mcp-server/git/target/release/rust-mcp-git"
+command: "/Users/xiivth/workspaces/signs/mcp-server/bin/git/rust-mcp-git"
 args:
   - "--root"
   - "/Users/xiivth/workspaces/signs"
