@@ -1,6 +1,6 @@
 name: exec
 enabled: true
-command: "/Users/xiivth/workspaces/signs/mcp-server/exec/target/release/rust-mcp-exec"
+command: "/Users/xiivth/workspaces/signs/mcp-server/bin/exec/rust-mcp-exec"
 args:
   - "--root"
   - "/Users/xiivth/workspaces/signs"
