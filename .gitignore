@@ -1,5 +1,12 @@
 /target/
+/dist/
 .codegraph/
+
+# Local development artifacts
+/issues/m4-quality-gates.log
+/node_modules/
+/package.json
+/pnpm-lock.yaml
 
 # OS / editor noise
 .DS_Store
