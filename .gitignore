@@ -1,4 +1,5 @@
 /target/
+.codegraph/
 
 # OS / editor noise
 .DS_Store
