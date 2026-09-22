@@ -441,4 +441,55 @@ mod tests {
         drop(third);
         drop(other);
     }
+
+    #[tokio::test]
+    async fn bounded_scheduler_soak_releases_all_capacity_without_leaks() {
+        const GLOBAL_LIMIT: usize = 8;
+        const QUEUE_LIMIT: usize = 32;
+        const BATCH: usize = GLOBAL_LIMIT + QUEUE_LIMIT;
+        const ROUNDS: usize = 100;
+
+        let coordinator = Coordinator::new(GLOBAL_LIMIT, QUEUE_LIMIT, Duration::from_secs(2));
+
+        for round in 0..ROUNDS {
+            let mut tasks = Vec::with_capacity(BATCH);
+            for index in 0..BATCH {
+                let coordinator = Arc::clone(&coordinator);
+                tasks.push(tokio::spawn(async move {
+                    let child = format!("child-{}", index % 4);
+                    let tool = format!("tool-{}", index % 8);
+                    let lease = coordinator
+                        .acquire(
+                            spec_with_limits(&child, &tool, GLOBAL_LIMIT, GLOBAL_LIMIT),
+                            CancellationToken::new(),
+                        )
+                        .await
+                        .expect("bounded soak admission should fit active + queue capacity");
+
+                    assert!(coordinator.active() <= GLOBAL_LIMIT);
+                    assert!(coordinator.queued() <= QUEUE_LIMIT);
+                    tokio::time::sleep(Duration::from_millis(1)).await;
+                    drop(lease);
+                }));
+            }
+
+            for task in tasks {
+                task.await.expect("bounded soak task must finish");
+            }
+
+            assert_eq!(
+                coordinator.active(),
+                0,
+                "round {round} leaked active scheduler capacity"
+            );
+            assert_eq!(
+                coordinator.queued(),
+                0,
+                "round {round} leaked queued scheduler capacity"
+            );
+        }
+
+        assert!(coordinator.is_accepting());
+        assert!(coordinator.wait_idle(Duration::from_secs(1)).await);
+    }
 }
